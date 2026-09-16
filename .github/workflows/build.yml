@@ -24,25 +24,20 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Auto Organize Android Project
+      - name: Auto Fix & Organize Android Project
         shell: bash
         run: |
-          set +e
-          # 1. Folders
-          mkdir -p gradle/wrapper
           mkdir -p app/src/main/java
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/drawable
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/xml
 
-          # 2. Version catalog & wrapper
-          if [ -f gradle-wrapper.properties ]; then mv -f gradle-wrapper.properties gradle/wrapper/; fi
-          if [ -f libs.versions.toml ]; then mv -f libs.versions.toml gradle/; fi
+          # 1. Manifest & Proguard
           if [ -f AndroidManifest.xml ]; then mv -f AndroidManifest.xml app/src/main/; fi
           if [ -f proguard-rules.pro ]; then mv -f proguard-rules.pro app/; fi
 
-          # 3. Kotlin files
+          # 2. Kotlin files by package
           for f in *.kt; do
             if [ -f "$f" ]; then
               pkg=$(grep -m 1 "^package " "$f" | sed -e 's/package //' -e 's/;//' -e 's/\r//' | tr '.' '/')
@@ -51,32 +46,111 @@ jobs:
             fi
           done
 
-          # 4. XML Resources
+          # 3. Layouts & Drawables
           for f in activity_*.xml overlay_*.xml item_*.xml; do
             if [ -f "$f" ]; then mv -f "$f" app/src/main/res/layout/; fi
           done
           for f in bg_*.xml ic_*.xml; do
             if [ -f "$f" ]; then mv -f "$f" app/src/main/res/drawable/; fi
           done
-          for f in colors.xml strings.xml themes.xml; do
-            if [ -f "$f" ]; then mv -f "$f" app/src/main/res/values/; fi
-          done
           for f in backup_rules.xml data_extraction_rules.xml; do
             if [ -f "$f" ]; then mv -f "$f" app/src/main/res/xml/; fi
           done
 
-          # 5. Build files
+          # 4. Generate all required values (Strings, Themes, Colors)
+          cat << 'EOF' > app/src/main/res/values/strings.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <string name="app_name">Candle Move Tracker</string>
+              <string name="tagline">Visual Candle Movement Counter</string>
+              <string name="start_analyzer">Start Analyzer</string>
+              <string name="stop_analyzer">Stop Analyzer</string>
+              <string name="calibrate_chart">Calibrate Chart</string>
+              <string name="clear_history">Clear History</string>
+              <string name="show_overlay">Show Overlay</string>
+              <string name="hide_overlay">Hide Overlay</string>
+              <string name="up_label">UP</string>
+              <string name="down_label">DOWN</string>
+              <string name="time_label">TIME</string>
+              <string name="time_default">01:00</string>
+              <string name="zero">0</string>
+              <string name="history_title">1-Minute Candle History</string>
+              <string name="no_history">No candles analyzed yet.</string>
+              <string name="result_title">RESULT</string>
+              <string name="winner_up">UP DOMINANT (+%d)</string>
+              <string name="winner_down">DOWN DOMINANT (+%d)</string>
+              <string name="winner_tie">EQUAL BALANCE</string>
+              <string name="status_ready">Ready to Analyze</string>
+              <string name="status_running">Active Live Tracking</string>
+              <string name="status_calibrating">Calibrating Region</string>
+              <string name="permission_overlay_required">Please grant Display Over Other Apps permission.</string>
+              <string name="permission_projection_required">Screen capture permission is required.</string>
+              <string name="calibration_instruction">Drag bounding box over active candle. Tap Save when done.</string>
+              <string name="save_calibration">Save Region</string>
+              <string name="cancel">Cancel</string>
+              <string name="disclaimer_title">Visual Movement Notice</string>
+              <string name="disclaimer_body">Candle Move Tracker processes rendered screen frames via MediaProjection.</string>
+              <string name="i_understand">I Understand</string>
+          </resources>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/values/themes.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <style name="Theme.CandleMoveTracker" parent="Theme.Material3.Dark.NoActionBar">
+                  <item name="colorPrimary">@color/brand_primary</item>
+                  <item name="colorPrimaryVariant">@color/brand_primary_dark</item>
+                  <item name="colorSecondary">@color/brand_accent</item>
+                  <item name="android:statusBarColor">@color/bg_dark</item>
+                  <item name="android:windowBackground">@color/bg_dark</item>
+              </style>
+              <style name="Theme.CandleMoveTracker.Transparent" parent="Theme.Material3.Dark.NoActionBar">
+                  <item name="android:windowBackground">@android:color/transparent</item>
+                  <item name="android:windowIsTranslucent">true</item>
+                  <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+                  <item name="android:statusBarColor">@android:color/transparent</item>
+                  <item name="android:navigationBarColor">@android:color/transparent</item>
+              </style>
+          </resources>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/values/colors.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="brand_primary">#0284C7</color>
+              <color name="brand_primary_dark">#0369A1</color>
+              <color name="brand_accent">#38BDF8</color>
+              <color name="bg_dark">#0B0F19</color>
+              <color name="bg_card">#151C2E</color>
+              <color name="bg_card_border">#232F47</color>
+              <color name="bg_overlay">#E60F172A</color>
+              <color name="candle_up">#10B981</color>
+              <color name="candle_up_bg">#1A10B981</color>
+              <color name="candle_up_glow">#3310B981</color>
+              <color name="candle_down">#EF4444</color>
+              <color name="candle_down_bg">#1AEF4444</color>
+              <color name="candle_down_glow">#33EF4444</color>
+              <color name="text_primary">#F8FAFC</color>
+              <color name="text_secondary">#94A3B8</color>
+              <color name="text_muted">#64748B</color>
+              <color name="accent_warning">#F59E0B</color>
+              <color name="calibration_rect">#38BDF8</color>
+              <color name="calibration_handle">#F59E0B</color>
+          </resources>
+          EOF
+
+          # 5. Clean Gradle build configs without missing version catalogs
           cat << 'EOF' > build.gradle.kts
           plugins {
-              alias(libs.plugins.android.application) apply false
-              alias(libs.plugins.kotlin.android) apply false
+              id("com.android.application") version "8.5.2" apply false
+              id("org.jetbrains.kotlin.android") version "2.0.0" apply false
           }
           EOF
 
           cat << 'EOF' > app/build.gradle.kts
           plugins {
-              alias(libs.plugins.android.application)
-              alias(libs.plugins.kotlin.android)
+              id("com.android.application")
+              id("org.jetbrains.kotlin.android")
           }
 
           android {
@@ -94,10 +168,6 @@ jobs:
               buildTypes {
                   release {
                       isMinifyEnabled = false
-                      proguardFiles(
-                          getDefaultProguardFile("proguard-android-optimize.txt"),
-                          "proguard-rules.pro"
-                      )
                   }
                   debug {
                       isMinifyEnabled = false
@@ -119,26 +189,20 @@ jobs:
           }
 
           dependencies {
-              implementation(libs.androidx.core.ktx)
-              implementation(libs.androidx.appcompat)
-              implementation(libs.material)
-              implementation(libs.androidx.activity.ktx)
-              implementation(libs.androidx.lifecycle.runtime.ktx)
-              implementation(libs.androidx.lifecycle.service)
-              implementation(libs.kotlinx.coroutines.android)
+              implementation("androidx.core:core-ktx:1.13.1")
+              implementation("androidx.appcompat:appcompat:1.7.0")
+              implementation("com.google.android.material:material:1.12.0")
+              implementation("androidx.activity:activity-ktx:1.9.1")
+              implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+              implementation("androidx.lifecycle:lifecycle-service:2.8.4")
+              implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
           }
           EOF
 
           cat << 'EOF' > settings.gradle.kts
           pluginManagement {
               repositories {
-                  google {
-                      content {
-                          includeGroupByRegex("com\\.android.*")
-                          includeGroupByRegex("com\\.google.*")
-                          includeGroupByRegex("androidx.*")
-                      }
-                  }
+                  google()
                   mavenCentral()
                   gradlePluginPortal()
               }
@@ -155,10 +219,10 @@ jobs:
           EOF
 
       - name: Build Android Debug APK
-        run: gradle assembleDebug --stacktrace
+        run: gradle assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: CandleMoveTracker-App
+          name: CandleMoveTracker-APK
           path: app/build/outputs/apk/debug/app-debug.apk
