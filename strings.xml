@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Candle Move Tracker</string>
+    <string name="tagline">Visual Candle Movement Counter</string>
+    
+    <!-- Actions -->
+    <string name="start_analyzer">Start Analyzer</string>
+    <string name="stop_analyzer">Stop Analyzer</string>
+    <string name="calibrate_chart">Calibrate Chart</string>
+    <string name="clear_history">Clear History</string>
+    <string name="show_overlay">Show Overlay</string>
+    <string name="hide_overlay">Hide Overlay</string>
+    
+    <!-- Counters -->
+    <string name="up_label">UP</string>
+    <string name="down_label">DOWN</string>
+    <string name="time_label">TIME</string>
+    <string name="time_default">01:00</string>
+    <string name="zero">0</string>
+    
+    <!-- History & Results -->
+    <string name="history_title">1-Minute Candle History</string>
+    <string name="no_history">No candles analyzed yet. Start the analyzer and calibrate your chart region.</string>
+    <string name="result_title">RESULT</string>
+    <string name="winner_up">UP DOMINANT (+%d)</string>
+    <string name="winner_down">DOWN DOMINANT (+%d)</string>
+    <string name="winner_tie">EQUAL BALANCE</string>
+    
+    <!-- Status & Permissions -->
+    <string name="status_ready">Ready to Analyze</string>
+    <string name="status_running">Active Live Tracking</string>
+    <string name="status_calibrating">Calibrating Region</string>
+    <string name="permission_overlay_required">Please grant Display Over Other Apps permission to use the floating tracker.</string>
+    <string name="permission_projection_required">Screen capture permission is required for visual candle frame analysis.</string>
+    
+    <!-- Calibration Instructions -->
+    <string name="calibration_instruction">Drag the bounding box or corner handles to frame the currently forming 1-minute candle on your chart. Tap Save when done.</string>
+    <string name="save_calibration">Save Region</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Disclaimer / Limitations -->
+    <string name="disclaimer_title">Visual Movement Notice</string>
+    <string name="disclaimer_body">Candle Move Tracker processes rendered screen frames via MediaProjection. It does NOT use OCR, does NOT read price numbers, and does NOT connect to any broker/exchange API. It counts visible up/down graphic movements of the active candle. It cannot recover movements not rendered on screen. This tool does not provide financial advice, trading signals, or profit guarantees.</string>
+    <string name="i_understand">I Understand</string>
+</resources>
